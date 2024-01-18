@@ -8,9 +8,7 @@ const WorkModel = require("./models/Work");
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(
-  "mongodb+srv://Lemn:Ya78z7YKam38W99a@crud.fkpt1bo.mongodb.net/work?retryWrites=true&w=majority"
-);
+mongoose.connect("");
 
 app.post("/create", async (req, res) => {
   /*multer*/
