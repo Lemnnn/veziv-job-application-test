@@ -23,9 +23,7 @@ app.use(express.json());
 app.use(cors());
 app.use("/images", express.static(`${__dirname}/images`));
 
-mongoose.connect(
-  "mongodb+srv://Lemn:Ya78z7YKam38W99a@crud.fkpt1bo.mongodb.net/work?retryWrites=true&w=majority"
-);
+mongoose.connect("");
 
 app.post("/create", upload.single("image"), async (req, res) => {
   const workImage = req.file;
