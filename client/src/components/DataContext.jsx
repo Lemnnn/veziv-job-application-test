@@ -11,6 +11,9 @@ export function DataProvider({ children }) {
   const [workList, setWorkList] = useState([]);
   const [selectedCard, setSelectedCard] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const [imageName, setImageName] = useState("");
+  const [contextImage, setContextImage] = useState(null);
+  const [isClosed, setIsClosed] = useState(true);
 
   async function getData() {
     await axios.get("http://localhost:3001/read").then((response) => {
@@ -25,14 +28,14 @@ export function DataProvider({ children }) {
   const addToWorksList = async (e, image, title, link, description) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("image", image);
-    formData.append("title", title);
-    formData.append("link", link);
-    formData.append("description", description);
+    try {
+      const formData = { image, title, link, description };
 
-    await axios.post("http://localhost:3001/create", formData);
-    getData();
+      await axios.post("http://localhost:3001/create", formData);
+      getData();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const deleteWork = async (id) => {
@@ -49,21 +52,37 @@ export function DataProvider({ children }) {
 
   const handleCardSelect = (work) => {
     setSelectedCard(work);
+    setContextImage(work.image);
   };
 
-  const updateCard = async (e, id, title, link, description) => {
+  const updateCard = async (e, id, image, title, link, description) => {
     e.preventDefault();
 
     const updatedData = {
+      image,
       title,
       link,
       description,
     };
 
-    console.log(id, updatedData);
-
     await axios.patch(`http://localhost:3001/update/${id}`, updatedData);
     getData();
+  };
+
+  const uploadImage = async (image) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", image);
+
+      const response = await axios.post(
+        "http://localhost:3001/uploadImage",
+        formData
+      );
+
+      setImageName(response.data.image);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -78,6 +97,13 @@ export function DataProvider({ children }) {
         updateCard,
         isEditing,
         setIsEditing,
+        uploadImage,
+        imageName,
+        contextImage,
+        setContextImage,
+        setImageName,
+        isClosed,
+        setIsClosed,
       }}
     >
       {children}

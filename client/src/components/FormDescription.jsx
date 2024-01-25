@@ -1,14 +1,17 @@
-const FormDescription = ({ label, value, onChange }) => {
+const FormDescription = ({ label, value, onChange, placeholder }) => {
   return (
-    <label className="flex flex-col text-white font-bold text-xl">
-      {label}
-      <textarea
-        className="bg-white resize-none h-[150px] rounded-lg text-black p-1 text-lg"
-        value={value}
-        onChange={onChange}
-        maxLength="500"
-      ></textarea>
-    </label>
+    <div className="space-y-2">
+      <label className="text-sm text-white font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        {label}
+        <textarea
+          className="flex w-full text-black rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+          value={value}
+          onChange={onChange}
+          maxLength="250"
+          placeholder={placeholder}
+        ></textarea>
+      </label>
+    </div>
   );
 };
 

@@ -4,6 +4,7 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const app = express();
+const dotenv = require("dotenv").config();
 
 const WorkModel = require("./models/Work");
 
@@ -12,8 +13,7 @@ const storage = multer.diskStorage({
     cb(null, "./images");
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() + 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix);
+    cb(null, Date.now() + "-" + file.originalname);
   },
 });
 
@@ -23,24 +23,20 @@ app.use(express.json());
 app.use(cors());
 app.use("/images", express.static(`${__dirname}/images`));
 
-mongoose.connect("");
+mongoose.connect(process.env.MONGODB_KEY);
 
-app.post("/create", upload.single("image"), async (req, res) => {
-  const workImage = req.file;
-  const workTitle = req.body.title;
-  const workLink = req.body.link;
-  const workDescription = req.body.description;
-
-  console.log({ file: req.file, body: req.body });
+app.post("/create", async (req, res) => {
+  const { image, title, link, description } = req.body;
 
   try {
     const work = new WorkModel({
-      image: workImage.filename,
-      title: workTitle,
-      link: workLink,
-      description: workDescription,
+      image,
+      title,
+      link,
+      description,
     });
     await work.save();
+
     res.status(201).json({ message: "Entry created successfully" });
   } catch (error) {
     res.status(500).json({ error: "Error creating entry" });
@@ -49,10 +45,12 @@ app.post("/create", upload.single("image"), async (req, res) => {
 
 app.get("/read", async (req, res) => {
   try {
-    const result = await WorkModel.find({}).sort({ createdAt: -1 });
+    const result = await WorkModel.find({}).sort({ hidden: 1, createdAt: -1 });
     res.send(result);
   } catch (err) {
-    res.send(err);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", message: err.message });
   }
 });
 
@@ -62,7 +60,9 @@ app.delete("/delete/:id", async (req, res) => {
     await WorkModel.findByIdAndDelete(id);
     res.send("deleted");
   } catch (err) {
-    res.send(err);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", message: err.message });
   }
 });
 
@@ -80,20 +80,21 @@ app.patch("/toggleHidden/:id", async (req, res) => {
     );
     res.status(200).json({ updateStatus });
   } catch (err) {
-    res.send(err);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", message: err.message });
   }
 });
 
 app.patch("/update/:id", async (req, res) => {
   const { id } = req.params;
-  const { title, link, description } = req.body;
-
-  console.log(title, link, description);
+  const { image, title, link, description } = req.body;
 
   try {
     const updatedCardData = await WorkModel.findByIdAndUpdate(
       id,
       {
+        image,
         title,
         link,
         description,
@@ -104,7 +105,17 @@ app.patch("/update/:id", async (req, res) => {
     );
     res.status(200).json({ updatedCardData });
   } catch (err) {
-    res.send(err);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", message: err.message });
+  }
+});
+
+app.post("/uploadImage", upload.single("image"), async (req, res) => {
+  try {
+    res.status(201).json({ image: req.file.filename });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

@@ -3,7 +3,7 @@ import Works from "./components/Works";
 
 const App = () => {
   return (
-    <div className="w-full bg-white flex gap-10 relative">
+    <div className="w-full bg-white flex relative max-md:block">
       <Form />
       <Works />
     </div>

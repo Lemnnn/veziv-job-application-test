@@ -2,3 +2,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.hovered {
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  z-index: 1;
+}
